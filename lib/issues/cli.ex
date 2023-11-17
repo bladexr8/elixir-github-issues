@@ -1,4 +1,7 @@
 defmodule Issues.CLI do
+
+  import Issues.TableFormatter, only: [ print_table_for_columns: 2 ]
+
   @default_count 4
 
   @moduledoc """
@@ -7,7 +10,7 @@ defmodule Issues.CLI do
   table of the last _n_ issues in a github project
   """
 
-  def run(argv) do
+  def main(argv) do
     argv
     |> parse_args
     |> process
@@ -29,7 +32,7 @@ defmodule Issues.CLI do
   end
 
   def args_to_internal_representation([user, project, count]) do
-    { user, project, String.to_integer(count )}
+    { user, project, String.to_integer(count)}
   end
 
   def args_to_internal_representation([user, project]) do
@@ -49,14 +52,19 @@ defmodule Issues.CLI do
   end
 
   # main processing logic
-  def process({user, project, _count}) do
+  def process({user, project, count}) do
     Issues.GithubIssues.fetch(user, project)
     |> decode_response()
     |> sort_into_descending_order()
+    |> last(count)
+    |> print_table_for_columns(["number", "created_at", "title"])
   end
 
   # if API call successful, return result
-  def decode_response({:ok, body}), do: body
+  def decode_response({:ok, body}) do
+    IO.puts "***Decoding API Response..."
+    body
+  end
 
   # if API call unsuccessful, print error and exit
   def decode_response(({:error, error})) do
@@ -66,10 +74,19 @@ defmodule Issues.CLI do
 
   # sort returned issues in descending order
   def sort_into_descending_order(list_of_issues) do
+    IO.puts "***Sorting into Descending Order..."
     list_of_issues
     |> Enum.sort(fn i1, i2 ->
       i1["created_at"] >= i2["created_at"]
     end)
+  end
+
+  # extract first n entries from list
+  def last(list, count) do
+    IO.puts "Extracting First #{count} items from list..."
+    list
+    |> Enum.take(count)
+    |> Enum.reverse
   end
 
 end
