@@ -19,6 +19,6 @@ defmodule Issues.GithubIssues do
 
   # treat any other response as an error
   def handle_response({_, %{status_code: _, body: body}}) do
-    { :error body}
+    { :error, body}
   end
 end
