@@ -2,6 +2,8 @@ defmodule Issues.CLI do
 
   import Issues.TableFormatter, only: [ print_table_for_columns: 2 ]
 
+  require Logger
+
   @default_count 4
 
   @moduledoc """
@@ -62,7 +64,7 @@ defmodule Issues.CLI do
 
   # if API call successful, return result
   def decode_response({:ok, body}) do
-    IO.puts "***Decoding API Response..."
+    Logger.debug("***Decoding API Response...")
     body
   end
 
@@ -74,7 +76,7 @@ defmodule Issues.CLI do
 
   # sort returned issues in descending order
   def sort_into_descending_order(list_of_issues) do
-    IO.puts "***Sorting into Descending Order..."
+    Logger.debug("***Sorting into Descending Order...")
     list_of_issues
     |> Enum.sort(fn i1, i2 ->
       i1["created_at"] >= i2["created_at"]
@@ -83,7 +85,7 @@ defmodule Issues.CLI do
 
   # extract first n entries from list
   def last(list, count) do
-    IO.puts "Extracting First #{count} items from list..."
+    Logger.debug("Extracting First #{count} items from list...")
     list
     |> Enum.take(count)
     |> Enum.reverse
